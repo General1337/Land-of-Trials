@@ -22,7 +22,7 @@ public class GameCore implements Runnable
 		while(Running)
 		{
 			gameTime.Update();
-			System.out.println("Hello world");
+			System.out.println(Running);
 		}
 	}
 }
