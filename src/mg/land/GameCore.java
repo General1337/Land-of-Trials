@@ -7,22 +7,35 @@ package mg.land;
  */
 public class GameCore implements Runnable
 {
-	public volatile boolean Running;
+	protected volatile boolean Running;
 	public GameTime gameTime;
 	
 	public GameCore()
 	{
 		this.gameTime = new GameTime();
-		Running = true;
 	}
 	
-	
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Runnable#run()
+	 * The main update loop of the game.
+	 */
 	public void run()
 	{
+		Running = true;
 		while(Running)
 		{
 			gameTime.Update();
 			System.out.println(Running);
 		}
+	}
+	
+	public void Pause()
+	{
+		this.Running = false;
+	}
+	public void Resume()
+	{
+		this.Running = true;
 	}
 }

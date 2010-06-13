@@ -6,8 +6,8 @@ import org.luaj.platform.*;
 import org.luaj.vm.*;
 
 
-
-public class Main extends Activity {
+public class Main extends Activity 
+{
 	
 	public static GameCore game;
 	public Thread gameThread;
@@ -24,7 +24,7 @@ public class Main extends Activity {
     public void onStart()
     {
     	gameThread = new Thread(game);
-    	gameThread.run();
+    	gameThread.start();
     }
     
     public void onResume()
