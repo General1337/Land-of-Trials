@@ -1,19 +1,37 @@
 package mg.land;
 
+import mg.land.event.*;
+
 /*
  * This is the core. It is run as a thread, with the game loop running in its own thread.
  * This is to make timing and other such issues easier, as well as make it easier to respond to OS events.
  * 
+ * This is a singleton class.
  */
 public class GameCore implements Runnable
 {
+	// for singleton
+	protected static GameCore instance = null;
+	
 	protected volatile boolean Running;
 	public GameTime gameTime;
+
 	
-	public GameCore()
+	protected GameCore() // protected to enforce singleton
 	{
-		this.gameTime = new GameTime();
 	}
+	
+	public GameCore getInstance()
+	{
+		if(instance == null) 
+		{
+			instance = new GameCore();
+			
+			this.gameTime = new GameTime();
+		}
+		return instance;
+	}
+	
 	
 	/*
 	 * (non-Javadoc)
@@ -26,6 +44,9 @@ public class GameCore implements Runnable
 		while(Running)
 		{
 			gameTime.Update();
+			ArgsUpdate args = new ArgsUpdate();
+			args.gameTime = this.gameTime;
+			this.onUpdate.Trigger(args);
 			System.out.println(Running);
 		}
 	}
