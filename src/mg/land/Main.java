@@ -20,18 +20,26 @@ public class Main extends Activity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        Log.d("Testing Lua", "Hello.");
+        System.out.println("Hello from main?");
         try 
-        {
-            LuaState state = LuaStateFactory.newLuaState();
+        { 
+        	LuaState L = LuaStateFactory.newLuaState();
             /*
              * Convert the input stream into a string to be sent to lua.
              */
             InputStream stream = getAssets().open("test.lua");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+           	StringBuilder sb = new StringBuilder();
+           	String line = null;
+           	while((line = reader.readLine()) != null)
+           	{
+           		sb.append(line + "\n");
+           	}
             
-            
-            Log.d("Test file name", );
-            state.LdoString();
+           	reader.close();
+           	stream.close();
+            Log.d("Test file contents", sb.toString());
+            L.LdoString(sb.toString());
         } catch (Exception e)
         {
         	e.printStackTrace();
@@ -55,4 +63,35 @@ public class Main extends Activity
     	
     	super.onResume();
     }
+     
+    public static int open(LuaState L) throws LuaException
+    {
+    	Log.d("Lua called me!", "WOOO");
+      L.newTable();
+      L.pushValue(-1);
+      L.setGlobal("eg");
+
+      L.pushString("example");
+
+      L.pushJavaFunction(new JavaFunction(L) {
+        /**
+         * Example for loadLib.
+         * Prints the time and the first parameter, if any.
+         */
+        public int execute() throws LuaException
+        {
+          if (L.getTop() > 1)
+          {
+            System.out.println(getParam(2));
+          }
+          
+          return 0;
+        }
+      });
+
+      L.setTable(-3);
+
+      return 1;
+    }
+
 }
