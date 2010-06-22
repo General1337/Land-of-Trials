@@ -1,6 +1,7 @@
 package mg.land;
 
 import mg.land.event.*;
+import android.util.Log;
 
 /*
  * This is the core. It is run as a thread, with the game loop running in its own thread.
@@ -43,11 +44,8 @@ public class GameCore implements Runnable
 		Running = true;
 		while(Running)
 		{
-			gameTime.Update();
-			ArgsUpdate args = new ArgsUpdate();
-			args.gameTime = this.gameTime;
-			this.onUpdate.Trigger(args);
-			System.out.println(Running);
+			//gameTime.Update();
+			//System.out.println(Running);
 		}
 	}
 	
