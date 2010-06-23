@@ -35,7 +35,7 @@ public class Main extends Activity
            	{
            		sb.append(line + "\n");
            	}
-            
+             
            	reader.close();
            	stream.close();
             Log.d("Test file contents", sb.toString());
