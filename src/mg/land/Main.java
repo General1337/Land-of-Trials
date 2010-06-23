@@ -7,11 +7,14 @@ import android.os.Bundle;
 import android.util.Log;
 import mg.land.event.*;
 import org.keplerproject.luajava.*;
+import junit.framework.Assert;
 
 public class Main extends Activity 
 {
 	
 	public static GameCore game;
+	protected static Main _main;
+	
 	public Thread gameThread;
 	
     /** Called when the activity is first created. */
@@ -20,35 +23,36 @@ public class Main extends Activity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        System.out.println("Hello from main?");
-        try 
-        { 
-        	LuaState L = LuaStateFactory.newLuaState();
-            /*
-             * Convert the input stream into a string to be sent to lua.
-             */
-            InputStream stream = getAssets().open("test.lua");
-            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-           	StringBuilder sb = new StringBuilder();
-           	String line = null;
-           	while((line = reader.readLine()) != null)
-           	{
-           		sb.append(line + "\n");
-           	}
-            
-           	reader.close();
-           	stream.close();
-            Log.d("Test file contents", sb.toString());
-            L.LdoString(sb.toString());
-            L.error(); 
-        } catch (Exception e)
-        {
-        	e.printStackTrace();
-        }
-
         
-        game = new GameCore();
+        
+        Main._main = this;
+        game = GameCore.getInstance();
     }
+    
+    public static Main getInstance()
+    {
+    	return _main;
+    }
+    
+    /*********************************************
+     * Begin application layer functionality
+     */
+    public InputStream getAsset(String asset)
+    {
+    	InputStream out = null;
+    	try
+    	{
+    		out = getAssets().open(asset);
+    	    return out;
+    	}
+    	catch(IOException e)
+    	{
+    		Log.e("Error loading asset in Main", asset);
+    	}
+    	Assert.assertNotNull("Error loading asset " + asset, out);
+    	return out;
+    }
+    
     
     @Override
     public void onStart()
@@ -94,5 +98,5 @@ public class Main extends Activity
 
       return 1;
     }
-
+    
 }

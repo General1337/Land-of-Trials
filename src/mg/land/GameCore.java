@@ -1,6 +1,7 @@
 package mg.land;
 
 import mg.land.event.*;
+import android.content.res.AssetManager;
 import android.util.Log;
 
 /*
@@ -14,26 +15,31 @@ public class GameCore implements Runnable
 	// for singleton
 	protected static GameCore instance = null;
 	
+	
 	protected volatile boolean Running;
 	public GameTime gameTime;
-
+	public LuaManager lua;
 	
 	protected GameCore() // protected to enforce singleton
 	{
 	}
 	
-	public GameCore getInstance()
+	public static GameCore getInstance()
 	{
 		if(instance == null) 
 		{
+			Log.v("Setup", "Creating game core...");
 			instance = new GameCore();
-			
-			this.gameTime = new GameTime();
+			instance.init();
 		}
 		return instance;
 	}
 	
-	
+	public void init()
+	{
+		this.lua = new LuaManager();
+		this.gameTime = new GameTime();
+	}
 	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Runnable#run()
@@ -41,6 +47,8 @@ public class GameCore implements Runnable
 	 */
 	public void run()
 	{
+		lua.loadScript("test.lua");
+		System.out.println("Logg..");
 		Running = true;
 		while(Running)
 		{
