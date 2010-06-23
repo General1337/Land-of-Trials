@@ -24,9 +24,11 @@ public class Main extends Activity
         try 
         { 
         	LuaState L = LuaStateFactory.newLuaState();
+        	L.openLibs();
+        	
             /*
              * Convert the input stream into a string to be sent to lua.
-             */
+             */ 
             InputStream stream = getAssets().open("test.lua");
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
            	StringBuilder sb = new StringBuilder();
@@ -39,12 +41,12 @@ public class Main extends Activity
            	reader.close();
            	stream.close();
             Log.d("Test file contents", sb.toString());
-            L.LdoString(sb.toString());
+            L.LdoString(sb.toString()); 
+            System.out.println("Test output..." + L.error());
         } catch (Exception e)
         {
         	e.printStackTrace();
         }
-
         
         game = new GameCore();
     }
