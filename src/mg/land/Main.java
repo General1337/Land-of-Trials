@@ -40,6 +40,7 @@ public class Main extends Activity
            	stream.close();
             Log.d("Test file contents", sb.toString());
             L.LdoString(sb.toString());
+            L.error(); 
         } catch (Exception e)
         {
         	e.printStackTrace();
