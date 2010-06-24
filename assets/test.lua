@@ -1,8 +1,7 @@
 luajava.loadLib("mg.land.Main", "open")
+i = 0
+while(i < 15) do
 eg.example("Testing a loop")
-
-i = 3
-while i < 10 do
-eg.example(i)
-i = i + 1;
+print("This is a real print test")
+i = i + 1
 end
