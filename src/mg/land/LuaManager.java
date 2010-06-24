@@ -10,17 +10,18 @@ import android.util.Log;
 public class LuaManager 
 {
 	protected LuaState lua;
-	
+	 
 	public LuaManager()
 	{
 		Log.v("Setup", "Creating lua manager...");
 		lua = LuaStateFactory.newLuaState();
-	} 
-	
+		lua.openLibs();
+	}  
+	 
 	public void loadScript(String asset)
 	{
 		try{
-	        InputStream stream = Main.getInstance().getAssets().open(asset);
+	        InputStream stream = Main.getInstance().getAsset(asset);
 	        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 	       	StringBuilder sb = new StringBuilder();
 	       	String line = null;

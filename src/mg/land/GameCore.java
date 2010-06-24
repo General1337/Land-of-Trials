@@ -47,13 +47,13 @@ public class GameCore implements Runnable
 	 */
 	public void run()
 	{
+		Log.v("System", "Beginning update loop...");
 		lua.loadScript("test.lua");
-		System.out.println("Logg..");
+		
 		Running = true;
 		while(Running)
 		{
-			//gameTime.Update();
-			//System.out.println(Running);
+			gameTime.Update();
 		}
 	}
 	
@@ -65,4 +65,5 @@ public class GameCore implements Runnable
 	{
 		this.Running = true;
 	}
+	
 }

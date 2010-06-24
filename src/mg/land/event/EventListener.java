@@ -6,5 +6,5 @@ package mg.land.event;
  */
 public interface EventListener 
 {
-	public void Invoke(Object ... args);
+	public void Invoke(Object arg1, Object arg2, Object arg3);
 }

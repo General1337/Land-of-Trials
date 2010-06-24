@@ -27,6 +27,7 @@ public class Main extends Activity
         
         Main._main = this;
         game = GameCore.getInstance();
+        
     }
     
     public static Main getInstance()
@@ -45,11 +46,12 @@ public class Main extends Activity
     		out = getAssets().open(asset);
     	    return out;
     	}
-    	catch(IOException e)
+    	catch(Exception e)
     	{
-    		Log.e("Error loading asset in Main", asset);
+    		Log.e("Unable to locate asset: ", asset);
+    		
     	}
-    	Assert.assertNotNull("Error loading asset " + asset, out);
+
     	return out;
     }
     
@@ -57,6 +59,7 @@ public class Main extends Activity
     @Override
     public void onStart()
     {    	
+    	Log.v("System", "Starting activity...");
     	super.onStart();
     	gameThread = new Thread(game);
     	gameThread.start();

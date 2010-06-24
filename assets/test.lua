@@ -1,7 +1,14 @@
 luajava.loadLib("mg.land.Main", "open")
-i = 0
-while(i < 15) do
-eg.example("Testing a loop")
-print("This is a real print test")
-i = i + 1
+
+print("I've been called!")
+
+proxytest = {}
+function proxytest.Invoke(var1, var2, var3) 
+	print(var1 .. var2 .. var3 .. "\n")
 end
+
+proxy = luajava.createProxy("mg.land.event.EventListener", proxytest)
+
+testEvent = luajava.newInstance("mg.land.event.TestEvent")
+testEvent:AddListener(proxy)
+//testEvent:Trigger()
