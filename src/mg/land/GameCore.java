@@ -1,8 +1,11 @@
 package mg.land;
 
+import graphics.GraphicsLayer;
 import mg.land.event.*;
 import android.content.res.AssetManager;
+import android.graphics.Canvas;
 import android.util.Log;
+import android.view.SurfaceHolder;
 
 /*
  * This is the core. It is run as a thread, with the game loop running in its own thread.
@@ -15,10 +18,11 @@ public class GameCore implements Runnable
 	// for singleton
 	protected static GameCore instance = null;
 	
-	
 	protected volatile boolean Running;
+	
 	public GameTime gameTime;
 	public LuaManager lua;
+	public GraphicsLayer gl;
 	
 	protected GameCore() // protected to enforce singleton
 	{
@@ -37,6 +41,7 @@ public class GameCore implements Runnable
 	
 	public void init()
 	{
+		this.gl = new GraphicsLayer(Main.getInstance());
 		this.lua = new LuaManager();
 		this.gameTime = new GameTime();
 	}
@@ -54,6 +59,25 @@ public class GameCore implements Runnable
 		while(Running)
 		{
 			gameTime.Update();
+			gl.Update(gameTime);
+			Canvas c = null;
+			try
+			{
+				SurfaceHolder holder = gl.getHolder();
+				c = holder.lockCanvas(null);
+				synchronized(holder)
+				{
+					gl.Render(c);
+				}
+            } finally {
+                // do this in a finally so that if an exception is thrown
+                // during the above, we don't leave the Surface in an
+                // inconsistent state
+                if (c != null) {
+                    gl.getHolder().unlockCanvasAndPost(c);
+                }
+            }
+            
 		}
 	}
 	

@@ -1,13 +1,19 @@
 package mg.land;
 
+import graphics.GraphicsLayer;
+import graphics.Vector2;
+
 import java.io.*;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Window;
+import android.view.WindowManager;
 import mg.land.event.*;
 import org.keplerproject.luajava.*;
-import junit.framework.Assert;
 
 public class Main extends Activity 
 {
@@ -22,12 +28,9 @@ public class Main extends Activity
     public void onCreate(Bundle savedInstanceState) 
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
-        
-        
         Main._main = this;
         game = GameCore.getInstance();
-        
+        setContentView(game.gl);
     }
     
     public static Main getInstance()
@@ -61,9 +64,19 @@ public class Main extends Activity
     {    	
     	Log.v("System", "Starting activity...");
     	super.onStart();
-    	gameThread = new Thread(game);
+        //getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+
+    	
+    	gameThread= new Thread(game);
     	gameThread.start();
 
+    }
+    
+    public Vector2 Resolution()
+    {
+    	DisplayMetrics dm = new DisplayMetrics();
+    	getWindowManager().getDefaultDisplay().getMetrics(dm);
+    	return new Vector2(dm.widthPixels, dm.heightPixels);
     }
     
     public void onResume()

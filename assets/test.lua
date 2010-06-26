@@ -11,4 +11,3 @@ proxy = luajava.createProxy("mg.land.event.EventListener", proxytest)
 
 testEvent = luajava.newInstance("mg.land.event.TestEvent")
 testEvent:AddListener(proxy)
-//testEvent:Trigger()
