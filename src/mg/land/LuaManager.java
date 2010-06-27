@@ -17,7 +17,11 @@ public class LuaManager
 		lua = LuaStateFactory.newLuaState();
 		lua.openLibs();
 	}  
-	 
+	
+	/**
+	 * Loads a script from the assets folder, given a string name.
+	 * @param asset
+	 */
 	public void loadScript(String asset)
 	{
 		try{

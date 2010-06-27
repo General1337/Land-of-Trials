@@ -1,5 +1,3 @@
-luajava.loadLib("mg.land.Main", "open")
-
 print("I've been called!")
 
 proxytest = {}

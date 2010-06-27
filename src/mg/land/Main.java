@@ -1,6 +1,6 @@
 package mg.land;
 
-import graphics.GraphicsLayer;
+
 import graphics.Vector2;
 
 import java.io.*;
@@ -15,11 +15,19 @@ import android.view.WindowManager;
 import mg.land.event.*;
 import org.keplerproject.luajava.*;
 
+/**
+ * The primary activity for the project, houses all OS callbacks.
+ * This class instantiates the GameCore object in a seperate thread.
+ * It is also a wrapper for most of the OS-specific functions.
+ * @author Holtzen
+ *
+ */
 public class Main extends Activity 
 {
 	
 	public static GameCore game;
 	protected static Main _main;
+	
 	
 	public Thread gameThread;
 	
@@ -29,8 +37,7 @@ public class Main extends Activity
     {
         super.onCreate(savedInstanceState);
         Main._main = this;
-        game = GameCore.getInstance();
-        setContentView(game.gl);
+        
     }
     
     public static Main getInstance()
@@ -38,8 +45,8 @@ public class Main extends Activity
     	return _main;
     }
     
-    /*********************************************
-     * Begin application layer functionality
+    /**
+     * Retrieves an asset from the assets folder. A simple wrapper system to ensure thread safety
      */
     public InputStream getAsset(String asset)
     {
@@ -59,60 +66,42 @@ public class Main extends Activity
     }
     
     
+    /**
+     * Called when the game is first started or resumes from losing focus.
+     */
     @Override
     public void onStart()
     {    	
     	Log.v("System", "Starting activity...");
     	super.onStart();
-        //getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-
-    	
-    	gameThread= new Thread(game);
-    	gameThread.start();
-
+        setContentView(R.layout.main);
     }
     
-    public Vector2 Resolution()
+    /**
+     * Called when the game loses focus.
+     */
+    @Override 
+    public void onStop()
     {
-    	DisplayMetrics dm = new DisplayMetrics();
-    	getWindowManager().getDefaultDisplay().getMetrics(dm);
-    	return new Vector2(dm.widthPixels, dm.heightPixels);
+    	super.onStop();
+    	game.Pause();
     }
     
+    /**
+     * Called when the game is removed from memory / cleaned up.
+     */
+    @Override
+    public void onDestroy()
+    {
+    	super.onDestroy();
+    }
+    
+    /**
+     * Called when the game regains focus after losing it.
+     */
     public void onResume()
     {
     	
     	super.onResume();
     }
-     
-    public static int open(LuaState L) throws LuaException
-    {
-    	Log.d("Lua called me!", "WOOO");
-      L.newTable();
-      L.pushValue(-1);
-      L.setGlobal("eg");
-
-      L.pushString("example");
-
-      L.pushJavaFunction(new JavaFunction(L) {
-        /**
-         * Example for loadLib.
-         * Prints the time and the first parameter, if any.
-         */
-        public int execute() throws LuaException
-        {
-          if (L.getTop() > 1)
-          {
-            System.out.println(getParam(2));
-          }
-          
-          return 0;
-        }
-      });
-
-      L.setTable(-3);
-
-      return 1;
-    }
-    
 }

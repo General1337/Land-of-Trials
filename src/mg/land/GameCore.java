@@ -1,54 +1,69 @@
 package mg.land;
 
-import graphics.GraphicsLayer;
+import java.util.List;
+
+import graphics.Sprite;
+import graphics.Vector2;
 import mg.land.event.*;
+import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 
-/*
+/**
  * This is the core. It is run as a thread, with the game loop running in its own thread.
  * This is to make timing and other such issues easier, as well as make it easier to respond to OS events.
  * 
  * This is a singleton class.
  */
-public class GameCore implements Runnable
+public class GameCore extends SurfaceView implements SurfaceHolder.Callback, Runnable
 {
-	// for singleton
+	/** for singleton */
 	protected static GameCore instance = null;
 	
+	/**
+	 * When false, the main loop terminates.
+	 */
 	protected volatile boolean Running;
 	
 	public GameTime gameTime;
 	public LuaManager lua;
-	public GraphicsLayer gl;
 	
-	protected GameCore() // protected to enforce singleton
+	protected List<Sprite> _spriteList;
+	protected Vector2 _cameraOrigin;
+	protected Vector2 _cameraDims;
+	protected SurfaceHolder _surfaceHolder;
+	protected boolean _ready;
+	protected Thread gameThread;
+	
+	
+	public GameCore(Context context, AttributeSet attrs) // protected to enforce singleton
 	{
+		super(context, attrs);
+		
+		_cameraDims = new Vector2(500, 500);
+		_cameraOrigin = new Vector2(0,0);
+		
+		_surfaceHolder = this.getHolder();
+		getHolder().addCallback(this);
+		setFocusable(true);
+		
+		lua = new LuaManager();
+		gameTime = new GameTime();
+		
+		gameThread = new Thread(this);
 	}
 	
-	public static GameCore getInstance()
-	{
-		if(instance == null) 
-		{
-			Log.v("Setup", "Creating game core...");
-			instance = new GameCore();
-			instance.init();
-		}
-		return instance;
-	}
 	
-	public void init()
-	{
-		this.gl = new GraphicsLayer(Main.getInstance());
-		this.lua = new LuaManager();
-		this.gameTime = new GameTime();
-	}
-	/*
-	 * (non-Javadoc)
-	 * @see java.lang.Runnable#run()
-	 * The main update loop of the game.
+	/**
+	 * The main loop of the game, run in a seperate thread from the main activity.
+	 * This thread will continue indefinitely until the Pause() function is called.
+	 * 
 	 */
 	public void run()
 	{
@@ -59,35 +74,131 @@ public class GameCore implements Runnable
 		while(Running)
 		{
 			gameTime.Update();
-			gl.Update(gameTime);
+			
 			Canvas c = null;
 			try
 			{
-				SurfaceHolder holder = gl.getHolder();
-				c = holder.lockCanvas(null);
-				synchronized(holder)
+				c = getHolder().lockCanvas(null);
+				synchronized(this)
 				{
-					gl.Render(c);
+					Render(c);
 				}
             } finally {
                 // do this in a finally so that if an exception is thrown
                 // during the above, we don't leave the Surface in an
                 // inconsistent state
                 if (c != null) {
-                    gl.getHolder().unlockCanvasAndPost(c);
+                    getHolder().unlockCanvasAndPost(c);
                 }
             }
             
 		}
 	}
 	
+	/**
+	 * Call to pause the game. Threadsafe.
+	 */
 	public void Pause()
 	{
 		this.Running = false;
 	}
+	
+	/**
+	 * Call to resume. Threadsafe.
+	 */
 	public void Resume()
 	{
 		this.Running = true;
 	}
 	
+	
+	public void Destroy()
+	{
+
+	}
+	
+	
+	/**
+	 * Renders the frame
+	 * @param canvas
+	 */
+	public void Render(Canvas canvas)
+	{
+		canvas.drawColor(Color.BLUE); // clear the scene
+		/*for(Sprite sprite : _spriteList)
+		{
+			//canvas.drawBitmap(bitmap, srcRect, dstRect, paint)
+			Vector2 transformedCoords = TransformCoords(sprite.getLocation());
+			Vector2 dimensions = TransformCoords(new Vector2((float)sprite.getCellWidth(), sprite.getCellHeight()));
+			
+			
+			canvas.drawBitmap(sprite.getTexture(), sprite.getSourceRect(), 
+					new Rect((int)transformedCoords.x, (int)transformedCoords.y, (int)dimensions.x, (int)dimensions.y), null);
+		}
+		*/
+		Vector2 location = TransformCoords(new Vector2(250, 250));
+		Vector2 radius = TransformCoords(new Vector2(0, 25));
+		canvas.drawCircle(location.x, location.y, radius.y, new Paint());
+		
+	}
+	
+	@Override
+	public void surfaceChanged(SurfaceHolder holder, int format, int width,
+			int height) 
+	{
+		// TODO Auto-generated method stub
+		
+	}
+	
+	/**
+	 * Transforms world coordinates into pixel locations
+	 */
+	public Vector2 TransformCoords(Vector2 worldCoords)
+	{
+		return new Vector2(Math.round(worldCoords.x * (this.getWidth() / this._cameraDims.x)), 
+				Math.round(worldCoords.y * (this.getHeight() / this._cameraDims.y)));
+	}
+	
+	@Override
+	public void surfaceCreated(SurfaceHolder holder) 
+	{
+		// TODO Auto-generated method stub
+		this.Running = true;
+		gameThread.start();
+	}
+
+	@Override
+	public void surfaceDestroyed(SurfaceHolder holder) 
+	{
+		// TODO Auto-generated method stub
+		this.Running = false;
+		
+	}
+	
+	
+	//*******************************************************************
+	// * Graphics layer functionality
+	// * 
+	// *
+	
+	
+	public void AddSprite(Sprite sprite)
+	{
+		_spriteList.add(sprite);
+	}
+	
+	public void RemoveSprite(Sprite sprite)
+	{
+		_spriteList.remove(sprite);
+	}
+	
+	/**
+	 * Moves the camera to a location that centers on the location specified
+	 */
+	public void CenterCamera(Vector2 location)
+	{
+		this._cameraOrigin.x = location.x + (_cameraDims.x / 2);
+		this._cameraOrigin.y = location.y + (_cameraDims.y / 2);
+	}
+
 }
