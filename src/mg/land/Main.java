@@ -10,6 +10,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.SurfaceView;
 import android.view.Window;
 import android.view.WindowManager;
 import mg.land.event.*;
@@ -28,7 +29,6 @@ public class Main extends Activity
 	public static GameCore game;
 	protected static Main _main;
 	
-	
 	public Thread gameThread;
 	
     /** Called when the activity is first created. */
@@ -37,32 +37,12 @@ public class Main extends Activity
     {
         super.onCreate(savedInstanceState);
         Main._main = this;
-        
+        //this.getResources().getIdentifier(name, defType, defPackage)
     }
     
     public static Main getInstance()
     {
     	return _main;
-    }
-    
-    /**
-     * Retrieves an asset from the assets folder. A simple wrapper system to ensure thread safety
-     */
-    public InputStream getAsset(String asset)
-    {
-    	InputStream out = null;
-    	try
-    	{
-    		out = getAssets().open(asset);
-    	    return out;
-    	}
-    	catch(Exception e)
-    	{
-    		Log.e("Unable to locate asset: ", asset);
-    		
-    	}
-
-    	return out;
     }
     
     
@@ -75,6 +55,7 @@ public class Main extends Activity
     	Log.v("System", "Starting activity...");
     	super.onStart();
         setContentView(R.layout.main);
+        game = (GameCore) this.findViewById(R.layout.main);
     }
     
     /**
@@ -83,6 +64,7 @@ public class Main extends Activity
     @Override 
     public void onStop()
     {
+    	Log.v("System", "Stopping activity...");
     	super.onStop();
     	game.Pause();
     }
@@ -99,9 +81,18 @@ public class Main extends Activity
     /**
      * Called when the game regains focus after losing it.
      */
+    @Override
     public void onResume()
     {
     	
     	super.onResume();
+    }
+    
+    @Override
+    public void onPause()
+    {
+    	Log.v("System", "Pausing activity...");
+    	game.Pause();
+    	super.onPause();
     }
 }

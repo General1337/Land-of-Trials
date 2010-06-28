@@ -1,5 +1,6 @@
 package mg.land;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import graphics.Sprite;
@@ -10,6 +11,7 @@ import android.content.res.AssetManager;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -33,6 +35,7 @@ public class GameCore extends SurfaceView implements SurfaceHolder.Callback, Run
 	
 	public GameTime gameTime;
 	public LuaManager lua;
+	public ContentPipeline pipeline;
 	
 	protected List<Sprite> _spriteList;
 	protected Vector2 _cameraOrigin;
@@ -48,7 +51,9 @@ public class GameCore extends SurfaceView implements SurfaceHolder.Callback, Run
 		
 		_cameraDims = new Vector2(500, 500);
 		_cameraOrigin = new Vector2(0,0);
-		
+		_spriteList = new ArrayList<Sprite>();
+		pipeline = new ContentPipeline();
+	
 		_surfaceHolder = this.getHolder();
 		getHolder().addCallback(this);
 		setFocusable(true);
@@ -91,7 +96,6 @@ public class GameCore extends SurfaceView implements SurfaceHolder.Callback, Run
                     getHolder().unlockCanvasAndPost(c);
                 }
             }
-            
 		}
 	}
 	
@@ -100,7 +104,15 @@ public class GameCore extends SurfaceView implements SurfaceHolder.Callback, Run
 	 */
 	public void Pause()
 	{
+		Log.v("System", "Pausing game core...");
+		
 		this.Running = false;
+		try {
+			this.gameThread.wait();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -108,7 +120,10 @@ public class GameCore extends SurfaceView implements SurfaceHolder.Callback, Run
 	 */
 	public void Resume()
 	{
+		Log.v("System", "Resuming game core...");
+		
 		this.Running = true;
+		this.gameThread.notify();
 	}
 	
 	
@@ -125,21 +140,21 @@ public class GameCore extends SurfaceView implements SurfaceHolder.Callback, Run
 	public void Render(Canvas canvas)
 	{
 		canvas.drawColor(Color.BLUE); // clear the scene
-		/*for(Sprite sprite : _spriteList)
+		
+		// just return if there is nothing to draw
+		if(_spriteList.isEmpty())
+			return;
+		
+		for(Sprite sprite : _spriteList)
 		{
 			//canvas.drawBitmap(bitmap, srcRect, dstRect, paint)
+			sprite.Update(this.gameTime);
 			Vector2 transformedCoords = TransformCoords(sprite.getLocation());
 			Vector2 dimensions = TransformCoords(new Vector2((float)sprite.getCellWidth(), sprite.getCellHeight()));
 			
-			
 			canvas.drawBitmap(sprite.getTexture(), sprite.getSourceRect(), 
-					new Rect((int)transformedCoords.x, (int)transformedCoords.y, (int)dimensions.x, (int)dimensions.y), null);
+				new Rect((int)transformedCoords.x, (int)transformedCoords.y, (int)dimensions.x, (int)dimensions.y), null);
 		}
-		*/
-		Vector2 location = TransformCoords(new Vector2(250, 250));
-		Vector2 radius = TransformCoords(new Vector2(0, 25));
-		canvas.drawCircle(location.x, location.y, radius.y, new Paint());
-		
 	}
 	
 	@Override
@@ -147,7 +162,6 @@ public class GameCore extends SurfaceView implements SurfaceHolder.Callback, Run
 			int height) 
 	{
 		// TODO Auto-generated method stub
-		
 	}
 	
 	/**
@@ -184,21 +198,31 @@ public class GameCore extends SurfaceView implements SurfaceHolder.Callback, Run
 	
 	public void AddSprite(Sprite sprite)
 	{
-		_spriteList.add(sprite);
+		synchronized(this)
+		{
+			_spriteList.add(sprite);
+		}
 	}
+	
 	
 	public void RemoveSprite(Sprite sprite)
 	{
-		_spriteList.remove(sprite);
+		synchronized(this)
+		{
+			_spriteList.remove(sprite);
+		}
 	}
+	
 	
 	/**
 	 * Moves the camera to a location that centers on the location specified
 	 */
 	public void CenterCamera(Vector2 location)
 	{
-		this._cameraOrigin.x = location.x + (_cameraDims.x / 2);
-		this._cameraOrigin.y = location.y + (_cameraDims.y / 2);
+		synchronized(this)
+		{
+			this._cameraOrigin.x = location.x + (_cameraDims.x / 2);
+			this._cameraOrigin.y = location.y + (_cameraDims.y / 2);
+		}
 	}
-
 }

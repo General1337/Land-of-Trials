@@ -4,6 +4,7 @@ import java.util.Dictionary;
 import java.util.List;
 
 import mg.land.GameTime;
+import mg.land.Main;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 
@@ -13,17 +14,8 @@ import android.graphics.Rect;
  */
 public class Sprite implements Cloneable
 {
-	protected Bitmap _texture;
+	protected SpriteInfo _info;
 	protected Vector2 _location;
-	protected int _cellWidth;
-	protected int _cellHeight;
-	protected int _numCols;
-	protected int _numFrames;
-	
-	protected int _curFrame;
-	protected int _timeElapsed;
-	protected Dictionary<String, Animation> _animations;
-	
 	
 	public Sprite(String spriteName)
 	{
@@ -31,18 +23,9 @@ public class Sprite implements Cloneable
 	}
 	
 	
-	public Sprite(Bitmap texture, Vector2 location, int cellWidth, int cellHeight, int numCols,
-			int numFrames, Dictionary<String, Animation> animations)
+	public Sprite(SpriteInfo info)
 	{
-		this._texture = texture;
-		this._location = location;
-		this._cellWidth = cellWidth;
-		this._cellHeight = cellHeight;
-		this._numCols = numCols;
-		this._numFrames = numFrames;
-		this._animations = animations;
-		this._curFrame = 0;
-		
+		_info = info;
 	}
 	
 	/**
@@ -60,12 +43,24 @@ public class Sprite implements Cloneable
 	 */
 	public Vector2 getLocation()
 	{
-		return _location;
+		synchronized(Main.game)
+		{
+			return this._location;
+		}
+	}
+	
+	public void setLocation(float x, float y)
+	{
+		synchronized(Main.game)
+		{
+			this._location.x = x;
+			this._location.y = y;
+		}
 	}
 	
 	public Bitmap getTexture()
 	{
-		return _texture;
+		return _info.texture;
 	}
 	
 	public Rect getSourceRect()
@@ -77,11 +72,11 @@ public class Sprite implements Cloneable
 	
 	public int getCellWidth()
 	{
-		return _cellWidth;
+		return _info.cellWidth;
 	}
 	public int getCellHeight()
 	{
-		return _cellHeight;
+		return _info.cellHeight;
 	}
 	
 	/**
@@ -89,7 +84,6 @@ public class Sprite implements Cloneable
 	 */
 	public Sprite clone()
 	{
-		return new Sprite(this._texture, new Vector2(0,0), this._cellWidth, this._cellHeight, this._numCols, this._numFrames,
-				this._animations);
+		return new Sprite(_info);
 	}
 }

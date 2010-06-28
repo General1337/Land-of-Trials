@@ -25,7 +25,7 @@ public class LuaManager
 	public void loadScript(String asset)
 	{
 		try{
-	        InputStream stream = Main.getInstance().getAsset(asset);
+	        InputStream stream = Main.getInstance().getAssets().open(asset);
 	        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 	       	StringBuilder sb = new StringBuilder();
 	       	String line = null;
